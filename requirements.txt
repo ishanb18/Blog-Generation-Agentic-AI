@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────
+# requirements.txt — Blog Generation Agentic AI
+# ─────────────────────────────────────────────────────────────
+
+# LangChain / LangGraph ecosystem
+langchain-core>=0.3.0
+langchain-community>=0.3.0
+langchain-mistralai>=0.2.0
+langgraph>=0.2.0
+
+# LLM / Model provider (Mistral)
+mistralai>=1.0.0
+
+# Web search tool (TavilySearchResults)
+tavily-python>=0.5.0
+
+# Data validation
+pydantic>=2.5.0
+
+# Image generation (Google Gemini)
+google-genai>=0.8.0
+
+# Image handling (PIL / BytesIO)
+Pillow>=10.0.0
+
+# Streamlit frontend
+streamlit>=1.35.0
+
+# Data display (Plan tab table)
+pandas>=2.0.0
+
+# Environment variables
+python-dotenv>=1.0.0

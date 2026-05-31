@@ -1,0 +1,49 @@
+# ─── Virtual environments ───────────────────────────────────
+myenv/
+venv/
+.venv/
+env/
+ENV/
+
+# ─── Python cache ───────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── Jupyter ────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ─── Environment / secrets ──────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Generated blog outputs ─────────────────────────────────
+*.md
+!README.md
+
+# ─── Generated images ───────────────────────────────────────
+images/
+
+# ─── OS artifacts ───────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDE / Editor ───────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Logs ───────────────────────────────────────────────────
+*.log
+logs/
