@@ -235,8 +235,7 @@ The **Router agent** automatically selects the right mode:
 
 ## 🛣️ Roadmap
 
-- [ ] Multi-model support (GPT-4o, Claude, Gemini Pro)
-- [ ] Export to HTML / PDF
+- [ ] Multi-model support (GPT-4o, Claude, Gemini Pro,Mistral)
 - [ ] Scheduled blog generation (cron)
 - [ ] Vector store memory across blog sessions
 - [ ] Custom tone / audience persona presets
@@ -246,7 +245,6 @@ The **Router agent** automatically selects the right mode:
 ## 🤝 Contributing
 
 Contributions are welcome! Please open an issue first to discuss what you'd like to change.  
-See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
 ```bash
 # Fork → Clone → Branch → PR
@@ -255,13 +253,6 @@ git commit -m "feat: add my new feature"
 git push origin feature/my-new-feature
 ```
 
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
 
 <div align="center">
 
