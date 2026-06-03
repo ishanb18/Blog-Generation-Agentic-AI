@@ -27,6 +27,7 @@ build/
 
 # ─── Generated blog outputs ─────────────────────────────────
 *.md
+!system_design.md
 !README.md
 
 # ─── Generated images ───────────────────────────────────────
