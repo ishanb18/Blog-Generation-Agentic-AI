@@ -1,3 +1,13 @@
+"""
+bwa_frontend.py — Streamlit UI for the Blog Writer Agent.
+
+Tabs: Plan | Evidence | Markdown Preview | Images | Logs
+
+Features:
+- Live streaming progress as the LangGraph pipeline executes
+- Blog library: load previously generated .md files from the sidebar
+- Export: download as .md or full .zip bundle including images
+"""
 from __future__ import annotations
 
 import json
@@ -270,6 +280,12 @@ def log(msg: str):
 if run_btn:
     if not topic.strip():
         st.warning("Please enter a topic.")
+        st.stop()
+    if len(topic.strip()) < 5:
+        st.warning("Topic is too short — please be more specific (at least 5 characters).")
+        st.stop()
+    if len(topic.strip()) > 500:
+        st.error("Topic is too long (max 500 characters). Please shorten it.")
         st.stop()
 
     inputs: Dict[str, Any] = {

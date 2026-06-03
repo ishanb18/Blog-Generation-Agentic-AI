@@ -10,7 +10,7 @@
 
 # 🤖 Blog Generation Agentic AI
 
-### A production-grade, multi-agent blog writing pipeline powered by **LangGraph**, **Mistral AI**, and **Google Gemini**
+### A modular, multi-agent blog writing pipeline powered by **LangGraph**, **Mistral AI**, and **Google Gemini**
 
 <br/>
 
@@ -26,11 +26,17 @@
 
 ---
 
+## 🎬 Demo
+
+> **Record your demo and place it here as `assets/demo.gif`** — see [`assets/RECORD_DEMO.md`](assets/RECORD_DEMO.md) for step-by-step instructions (ScreenToGif recommended).
+
+---
+
 ## ✨ What This Does
 
 This project implements a **fully autonomous, agentic blog writing system** that takes a single topic as input and produces a polished, illustrated technical blog post — end to end — without any manual intervention.
 
-The system is built as a **LangGraph state graph** with specialized agents cooperating in a dynamic pipeline:
+The system is a **LangGraph state graph** with specialized agents cooperating in a dynamic pipeline:
 
 ```
 Topic Input
@@ -45,12 +51,12 @@ Topic Input
     ▼
 ┌─────────────┐
 │ Orchestrator│  Plans 5–9 structured sections
-│   (Planner) │
+│  (Planner)  │
 └──────┬──────┘
-       │ Fan-out (parallel)
+       │ Fan-out (parallel via Send)
        ▼
 ┌────────────────────────────────────────────┐
-│  Worker  │  Worker  │  Worker  │  Worker   │  ← Parallel section writers
+│  Worker  │  Worker  │  Worker  │  Worker   │  ← All sections written concurrently
 └──────────┴──────────┴──────────┴───────────┘
        │ Reduce
        ▼
@@ -69,42 +75,53 @@ Topic Input
 
 | Feature | Description |
 |---|---|
-| 🧭 **Smart Router** | Automatically classifies topics as `closed_book`, `hybrid`, or `open_book` and decides if web research is needed |
-| 🔍 **Web Research** | Searches the web via **Tavily** for up-to-date evidence, deduplicates and filters by recency |
+| 🧭 **Smart Router** | Classifies topics as `closed_book`, `hybrid`, or `open_book` and decides if web research is needed |
+| 🔍 **Web Research** | Searches the web via **Tavily**, deduplicates and filters results by recency |
 | 🗂️ **Structured Planning** | Orchestrator produces a typed `Plan` with 5–9 tasks, audience/tone metadata, and per-section constraints |
-| ⚡ **Parallel Writing** | Worker agents write all sections **in parallel** using LangGraph's `Send` fan-out pattern |
-| 🖼️ **AI Image Generation** | Uses **Gemini 2.5 Flash** to generate technical diagrams and inserts them inline into the blog |
+| ⚡ **Parallel Writing** | Workers write all sections **concurrently** using LangGraph's `Send` fan-out pattern |
+| 🖼️ **AI Image Generation** | Uses **Gemini 2.5 Flash** to generate technical diagrams inline, with retry logic |
 | 📰 **News Roundup Mode** | Detects breaking/volatile topics and switches to citation-only, event-driven writing |
 | 💾 **Blog Library** | Saves all generated blogs as `.md` files; load and re-read them from the sidebar |
-| 📦 **Export** | Download the blog as raw Markdown or a ZIP bundle with all images included |
+| 📦 **Export** | Download as raw Markdown or a ZIP bundle with all images included |
 | 🎛️ **Streamlit UI** | Tabbed interface: Plan · Evidence · Preview · Images · Logs — with live streaming progress |
 
 ---
 
 ## 🏗️ Architecture
 
+The codebase is organised as a proper Python package:
+
 ```
-blog-generation-agentic-ai/
-├── bwa_backend.py      # LangGraph graph definition (all agents + subgraph)
-├── bwa_frontend.py     # Streamlit UI (streaming, tabs, blog library, export)
-├── requirements.txt    # Python dependencies
-├── .env.example        # API key template
-├── .gitignore
-└── README.md
+blog_agent/                  ← Main package
+├── config.py                ← All constants + shared LLM instance
+├── schemas.py               ← Pydantic models + LangGraph State
+├── utils.py                 ← Shared utilities (slug, reading time, TOC)
+├── graph.py                 ← Assembles and compiles the LangGraph app
+└── nodes/
+    ├── router.py            ← Topic classification + research mode
+    ├── research.py          ← Tavily search + evidence synthesis
+    ├── orchestrator.py      ← Structured blog plan generation
+    ├── worker.py            ← Section writer (runs in parallel)
+    └── reducer.py           ← Merge + image planning + image generation
+
+bwa_backend.py               ← Backward-compat shim (re-exports app)
+bwa_frontend.py              ← Streamlit UI
+docs/system_design.md        ← Architecture decisions & design rationale
 ```
+
+> 📐 Read the full [System Design Document](docs/system_design.md) for a deep-dive into every architecture decision.
 
 ### Agent Roles
 
-| Agent | File | Responsibility |
+| Agent | Module | Responsibility |
 |---|---|---|
-| **Router** | `bwa_backend.py` | Decides research mode & web queries |
-| **Researcher** | `bwa_backend.py` | Fetches + filters Tavily results |
-| **Orchestrator** | `bwa_backend.py` | Generates structured blog plan |
-| **Worker** | `bwa_backend.py` | Writes individual sections (parallel) |
-| **Merge** | `bwa_backend.py` | Assembles sections in order |
-| **Image Planner** | `bwa_backend.py` | Decides where images go + writes prompts |
-| **Image Generator** | `bwa_backend.py` | Calls Gemini API, saves PNGs |
-| **Streamlit App** | `bwa_frontend.py` | Streams progress, renders tabs, handles export |
+| **Router** | `nodes/router.py` | Decides research mode & web queries |
+| **Researcher** | `nodes/research.py` | Fetches + filters Tavily results |
+| **Orchestrator** | `nodes/orchestrator.py` | Generates structured blog plan |
+| **Worker** | `nodes/worker.py` | Writes individual sections (parallel) |
+| **Merge** | `nodes/reducer.py` | Assembles sections in order |
+| **Image Planner** | `nodes/reducer.py` | Decides where images go + writes prompts |
+| **Image Generator** | `nodes/reducer.py` | Calls Gemini API, saves PNGs with retry |
 
 ---
 
@@ -153,6 +170,8 @@ GOOGLE_API_KEY=your_google_api_key_here
 > - Tavily: [tavily.com](https://tavily.com)
 > - Google Gemini: [aistudio.google.com](https://aistudio.google.com)
 
+> **Note:** The app works with only `MISTRAL_API_KEY`. Research and image generation degrade gracefully if the other keys are absent.
+
 ### 5. Run the app
 
 ```bash
@@ -165,7 +184,7 @@ Open [http://localhost:8501](http://localhost:8501) in your browser.
 
 ## 🎮 Usage
 
-1. **Enter a topic** in the sidebar text area  
+1. **Enter a topic** in the sidebar text area
    _Examples: "Transformer Self-Attention", "State of Multimodal LLMs in 2026", "Building RAG Pipelines"_
 
 2. **Set the as-of date** (defaults to today) — used for recency filtering in research mode
@@ -209,6 +228,17 @@ The **Router agent** automatically selects the right mode:
 
 ---
 
+## 🎓 What I Learned Building This
+
+- How to design **stateful multi-agent workflows** using LangGraph's `Send` API for true parallel execution
+- Working with **structured LLM outputs** via Pydantic v2 schemas — far more reliable than parsing raw text
+- How to handle **API failures gracefully** — the image generation fallback with exponential backoff ensures the pipeline never crashes
+- Building a **production-aware Streamlit app** with streaming, session state, and file I/O
+- Integrating **3 different AI APIs** (Mistral, Gemini, Tavily) in a single cohesive pipeline
+- The value of **modular architecture** — splitting a 560-line monolith into focused, testable modules
+
+---
+
 ## 🛣️ Roadmap
 
 - [ ] Multi-model support (GPT-4o, Claude, Gemini Pro)
@@ -221,7 +251,8 @@ The **Router agent** automatically selects the right mode:
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please open an issue first to discuss what you'd like to change.
+Contributions are welcome! Please open an issue first to discuss what you'd like to change.  
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
 ```bash
 # Fork → Clone → Branch → PR
