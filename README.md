@@ -26,12 +26,6 @@
 
 ---
 
-## 🎬 Demo
-
-> **Record your demo and place it here as `assets/demo.gif`** — see [`assets/RECORD_DEMO.md`](assets/RECORD_DEMO.md) for step-by-step instructions (ScreenToGif recommended).
-
----
-
 ## ✨ What This Does
 
 This project implements a **fully autonomous, agentic blog writing system** that takes a single topic as input and produces a polished, illustrated technical blog post — end to end — without any manual intervention.
